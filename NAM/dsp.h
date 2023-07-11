@@ -10,7 +10,7 @@
 #include <Eigen/Dense>
 
 #include "activations.h"
-#include "json.hpp"
+//#include "json.hpp"
 
 #ifdef NAM_SAMPLE_FLOAT
 #define NAM_SAMPLE float
@@ -233,10 +233,10 @@ struct dspData
 void verify_config_version(const std::string version);
 
 // Takes the model file and uses it to instantiate an instance of DSP.
-std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file);
+//std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file);
 // Creates an instance of DSP. Also returns a dspData struct that holds the data of the model.
-std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file, dspData& returnedConfig);
+//std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file, dspData& returnedConfig);
 // Instantiates a DSP object from dsp_config struct.
 std::unique_ptr<DSP> get_dsp(dspData& conf);
 // Legacy loader for directory-type DSPs
-std::unique_ptr<DSP> get_dsp_legacy(const std::filesystem::path dirname);
+//std::unique_ptr<DSP> get_dsp_legacy(const std::filesystem::path dirname);
