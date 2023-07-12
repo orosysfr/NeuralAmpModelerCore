@@ -11,6 +11,9 @@
 //#include "json.hpp"
 #include "util.h"
 
+namespace namcore
+{
+
 #define tanh_impl_ std::tanh
 // #define tanh_impl_ fast_tanh_
 
@@ -297,3 +300,5 @@ Eigen::MatrixXf Conv1x1::process(const Eigen::MatrixXf& input) const
   else
     return this->_weight * input;
 }
+
+};

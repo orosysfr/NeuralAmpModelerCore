@@ -7,7 +7,7 @@
 #include <Eigen/Dense>
 
 #include "dsp.h"
-#include "json.hpp"
+//#include "json.hpp"
 
 namespace lstm
 {
@@ -46,7 +46,7 @@ private:
 };
 
 // The multi-layer LSTM model
-class LSTM : public DSP
+class LSTM : public namcore::DSP
 {
 public:
   LSTM(const int num_layers, const int input_size, const int hidden_size, std::vector<float>& params,

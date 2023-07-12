@@ -175,7 +175,7 @@ wavenet::_Head::_Head(const int input_size, const int num_layers, const int chan
   int dx = input_size;
   for (int i = 0; i < num_layers; i++)
   {
-    this->_layers.push_back(Conv1x1(dx, i == num_layers - 1 ? 1 : channels, true));
+    this->_layers.push_back(namcore::Conv1x1(dx, i == num_layers - 1 ? 1 : channels, true));
     dx = channels;
     if (i < num_layers - 1)
       this->_buffers.push_back(Eigen::MatrixXf());

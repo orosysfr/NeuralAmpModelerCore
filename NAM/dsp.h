@@ -18,6 +18,9 @@
 #define NAM_SAMPLE double
 #endif
 
+namespace namcore
+{
+
 enum EArchitectures
 {
   kLinear = 0,
@@ -233,10 +236,12 @@ struct dspData
 void verify_config_version(const std::string version);
 
 // Takes the model file and uses it to instantiate an instance of DSP.
-//std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file);
+std::unique_ptr<DSP> get_dsp(const std::string model_file);
 // Creates an instance of DSP. Also returns a dspData struct that holds the data of the model.
-//std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file, dspData& returnedConfig);
+std::unique_ptr<DSP> get_dsp(const std::string model_file, dspData& returnedConfig);
 // Instantiates a DSP object from dsp_config struct.
 std::unique_ptr<DSP> get_dsp(dspData& conf);
 // Legacy loader for directory-type DSPs
 //std::unique_ptr<DSP> get_dsp_legacy(const std::filesystem::path dirname);
+
+}

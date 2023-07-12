@@ -42,7 +42,7 @@ public:
                    const std::string activation, std::vector<float>::iterator& params);
   void process_(const Eigen::MatrixXf& input, Eigen::MatrixXf& output, const long i_start, const long i_end) const;
   long get_out_channels() const;
-  Conv1D conv;
+  namcore::Conv1D conv;
 
 private:
   BatchNorm batchnorm;
@@ -62,7 +62,7 @@ private:
   float _bias;
 };
 
-class ConvNet : public Buffer
+class ConvNet : public namcore::Buffer
 {
 public:
   ConvNet(const int channels, const std::vector<int>& dilations, const bool batchnorm, const std::string activation,

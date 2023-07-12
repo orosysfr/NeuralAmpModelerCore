@@ -4,10 +4,13 @@
 #include <unordered_set>
 
 #include "dsp.h"
-#include "json.hpp"
+//#include "json.hpp"
 #include "lstm.h"
 #include "convnet.h"
 #include "wavenet.h"
+
+namespace namcore
+{
 
 struct Version
 {
@@ -64,7 +67,7 @@ void verify_config_version(const std::string versionStr)
   }
 }
 
-std::vector<float> GetWeights(nlohmann::json const& j, const std::filesystem::path config_path)
+std::vector<float> GetWeights(nlohmann::json const& j, const std::string config_path)
 {
   if (j.find("weights") != j.end())
   {
@@ -78,23 +81,24 @@ std::vector<float> GetWeights(nlohmann::json const& j, const std::filesystem::pa
     throw std::runtime_error("Corrupted model file is missing weights.");
 }
 
-std::unique_ptr<DSP> get_dsp_legacy(const std::filesystem::path model_dir)
+/*std::unique_ptr<DSP> get_dsp_legacy(const std::filesystem::path model_dir)
 {
   auto config_filename = model_dir / std::filesystem::path("config.json");
   dspData temp;
   return get_dsp(config_filename, temp);
-}
+}*/
 
-std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename)
+std::unique_ptr<DSP> get_dsp(const std::string config_filename)
 {
   dspData temp;
   return get_dsp(config_filename, temp);
 }
 
-std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspData& returnedConfig)
+std::unique_ptr<DSP> get_dsp(const std::string config_filename, dspData& returnedConfig)
 {
-  if (!std::filesystem::exists(config_filename))
-    throw std::runtime_error("Config JSON doesn't exist!\n");
+    
+  //if (!std::filesystem::exists(config_filename))
+  //  throw std::runtime_error("Config JSON doesn't exist!\n");
   std::ifstream i(config_filename);
   nlohmann::json j;
   i >> j;
@@ -116,8 +120,7 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspDat
   {
     returnedConfig.expected_sample_rate = -1.0;
   }
-
-
+ 
   /*Copy to a new dsp_config object for get_dsp below,
   since not sure if params actually get modified as being non-const references on some
   model constructors inside get_dsp(dsp_config& conf).
@@ -127,7 +130,7 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspDat
   return get_dsp(conf);
 }
 
-std::unique_ptr<DSP> get_dsp(dspData& conf)
+std::unique_ptr<namcore::DSP> get_dsp(namcore::dspData& conf)
 {
   verify_config_version(conf.version);
 
@@ -151,7 +154,7 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
   {
     const int receptive_field = config["receptive_field"];
     const bool _bias = config["bias"];
-    return std::make_unique<Linear>(loudness, receptive_field, _bias, params, expected_sample_rate);
+    return std::make_unique<namcore::Linear>(loudness, receptive_field, _bias, params, expected_sample_rate);
   }
   else if (architecture == "ConvNet")
   {
@@ -208,4 +211,5 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
   {
     throw std::runtime_error("Unrecognized architecture");
   }
+}
 }

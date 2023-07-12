@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "json.hpp"
+//#include "json.hpp"
 #include <Eigen/Dense>
 
 #include "dsp.h"
@@ -11,7 +11,7 @@
 namespace wavenet
 {
 // Rework the initialization API slightly. Merge w/ dsp.h later.
-class _DilatedConv : public Conv1D
+class _DilatedConv : public namcore::Conv1D
 {
 public:
   _DilatedConv(const int in_channels, const int out_channels, const int kernel_size, const int bias,
@@ -42,9 +42,9 @@ private:
   // The dilated convolution at the front of the block
   _DilatedConv _conv;
   // Input mixin
-  Conv1x1 _input_mixin;
+    namcore::Conv1x1 _input_mixin;
   // The post-activation 1x1 convolution
-  Conv1x1 _1x1;
+    namcore::Conv1x1 _1x1;
   // The internal state
   Eigen::MatrixXf _z;
 
@@ -115,7 +115,7 @@ public:
 private:
   long _buffer_start;
   // The rechannel before the layers
-  Conv1x1 _rechannel;
+    namcore::Conv1x1 _rechannel;
 
   // Buffers in between layers.
   // buffer [i] is the input to layer [i].
@@ -125,7 +125,7 @@ private:
   std::vector<_Layer> _layers;
 
   // Rechannel for the head
-  Conv1x1 _head_rechannel;
+    namcore::Conv1x1 _head_rechannel;
 
   long _get_buffer_size() const { return this->_layer_buffers.size() > 0 ? this->_layer_buffers[0].cols() : 0; };
   long _get_channels() const;
@@ -150,8 +150,8 @@ public:
 
 private:
   int _channels;
-  std::vector<Conv1x1> _layers;
-  Conv1x1 _head;
+  std::vector<namcore::Conv1x1> _layers;
+    namcore::Conv1x1 _head;
   activations::Activation* _activation;
 
   // Stores the outputs of the convs *except* the last one, which goes in
@@ -164,7 +164,7 @@ private:
 
 // The main WaveNet model
 // Both parametric and not; difference is handled at param read-in.
-class WaveNet : public DSP
+class WaveNet : public namcore::DSP
 {
 public:
   WaveNet(const std::vector<LayerArrayParams>& layer_array_params, const float head_scale, const bool with_head,

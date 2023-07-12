@@ -9,7 +9,7 @@
 
 // Version 2 DSP abstraction ==================================================
 
-namespace dsp
+namespace namdsp
 {
 class Params
 {
