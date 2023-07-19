@@ -12,6 +12,17 @@
 #include "util.h"
 #include "convnet.h"
 
+#ifndef _WIN32
+
+#else
+  #pragma warning(push)
+  #pragma warning(disable : 4100)
+  #pragma warning(disable : 4458)
+
+#endif
+
+
+
 convnet::BatchNorm::BatchNorm(const int dim, std::vector<float>::iterator& params)
 {
   // Extract from param buffer
@@ -195,3 +206,11 @@ void convnet::ConvNet::_reset_anti_pop_()
     receptive_field += this->_blocks[i].conv.get_dilation();
   this->_anti_pop_countdown = -receptive_field;
 }
+
+#ifndef _WIN32
+
+
+#else
+
+  #pragma warning(pop)
+#endif

@@ -7,8 +7,19 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#ifndef _WIN32
+
+#else
+  #pragma warning(push)
+  #pragma warning(disable : 4100)
+  #pragma warning(disable : 4458)
+
+#endif
+
+
+
+
 #include "dsp.h"
-//#include "json.hpp"
 #include "util.h"
 
 namespace namcore
@@ -302,3 +313,11 @@ Eigen::MatrixXf Conv1x1::process(const Eigen::MatrixXf& input) const
 }
 
 };
+
+
+#ifndef _WIN32
+
+#else
+
+  #pragma warning(pop)
+#endif
