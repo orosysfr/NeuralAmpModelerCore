@@ -4,6 +4,16 @@
 
 #include <Eigen/Dense>
 
+#ifndef _WIN32
+
+#else
+  #pragma warning(push)
+  #pragma warning(disable : 4244)
+  #pragma warning(disable : 4267)
+
+
+#endif
+
 #include "wavenet.h"
 
 wavenet::_DilatedConv::_DilatedConv(const int in_channels, const int out_channels, const int kernel_size,
@@ -401,3 +411,11 @@ void wavenet::WaveNet::_reset_anti_pop_()
     receptive_field += this->_layer_arrays[i].get_receptive_field();
   this->_anti_pop_countdown = -receptive_field;
 }
+
+#ifndef _WIN32
+
+
+#else
+
+#pragma warning(pop)
+#endif

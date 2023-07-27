@@ -107,7 +107,7 @@ void lstm::LSTM::_process_core_()
   if (this->_stale_params)
   {
     for (std::unordered_map<std::string, double>::iterator it = this->_params.begin(); it != this->_params.end(); ++it)
-      this->_input_and_params[this->_parametric_map[it->first]] = it->second;
+      this->_input_and_params[this->_parametric_map[it->first]] = (float)it->second;
     this->_stale_params = false;
   }
   // Process samples, placing results in the required output location
