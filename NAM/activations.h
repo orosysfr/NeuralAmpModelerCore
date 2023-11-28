@@ -5,7 +5,9 @@
 #include <unordered_map>
 #include <Eigen/Dense>
 
-namespace activations
+
+
+namespace namcore::activations
 {
 inline float relu(float x)
 {

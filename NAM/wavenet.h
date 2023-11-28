@@ -6,12 +6,12 @@
 //#include "json.hpp"
 #include <Eigen/Dense>
 
-#include "dsp.h"
+//#include "dsp.h"
 
-namespace wavenet
+namespace namcore::wavenet
 {
 // Rework the initialization API slightly. Merge w/ dsp.h later.
-class _DilatedConv : public namcore::Conv1D
+class _DilatedConv : public Conv1D
 {
 public:
   _DilatedConv(const int in_channels, const int out_channels, const int kernel_size, const int bias,
@@ -42,9 +42,9 @@ private:
   // The dilated convolution at the front of the block
   _DilatedConv _conv;
   // Input mixin
-    namcore::Conv1x1 _input_mixin;
+  Conv1x1 _input_mixin;
   // The post-activation 1x1 convolution
-    namcore::Conv1x1 _1x1;
+  Conv1x1 _1x1;
   // The internal state
   Eigen::MatrixXf _z;
 
@@ -115,7 +115,7 @@ public:
 private:
   long _buffer_start;
   // The rechannel before the layers
-    namcore::Conv1x1 _rechannel;
+  Conv1x1 _rechannel;
 
   // Buffers in between layers.
   // buffer [i] is the input to layer [i].
@@ -125,7 +125,7 @@ private:
   std::vector<_Layer> _layers;
 
   // Rechannel for the head
-    namcore::Conv1x1 _head_rechannel;
+  Conv1x1 _head_rechannel;
 
   long _get_buffer_size() const { return this->_layer_buffers.size() > 0 ? this->_layer_buffers[0].cols() : 0; };
   long _get_channels() const;
@@ -150,8 +150,8 @@ public:
 
 private:
   int _channels;
-  std::vector<namcore::Conv1x1> _layers;
-    namcore::Conv1x1 _head;
+  std::vector<Conv1x1> _layers;
+  Conv1x1 _head;
   activations::Activation* _activation;
 
   // Stores the outputs of the convs *except* the last one, which goes in
@@ -164,14 +164,11 @@ private:
 
 // The main WaveNet model
 // Both parametric and not; difference is handled at param read-in.
-class WaveNet : public namcore::DSP
+class WaveNet : public DSP
 {
 public:
   WaveNet(const std::vector<LayerArrayParams>& layer_array_params, const float head_scale, const bool with_head,
           nlohmann::json parametric, std::vector<float> params, const double expected_sample_rate = -1.0);
-  WaveNet(const double loudness, const std::vector<LayerArrayParams>& layer_array_params, const float head_scale,
-          const bool with_head, nlohmann::json parametric, std::vector<float> params,
-          const double expected_sample_rate = -1.0);
 
   //    WaveNet(WaveNet&&) = default;
   //    WaveNet& operator=(WaveNet&&) = default;
@@ -203,18 +200,9 @@ private:
   void _init_parametric_(nlohmann::json& parametric);
   void _prepare_for_frames_(const long num_frames);
   // Reminder: From ._input_post_gain to ._core_dsp_output
-  void _process_core_() override;
+  void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override;
 
   // Ensure that all buffer arrays are the right size for this num_frames
   void _set_num_frames_(const long num_frames);
-
-  // The net starts with random parameters inside; we need to wait for a full
-  // receptive field to pass through before we can count on the output being
-  // ok. This implements a gentle "ramp-up" so that there's no "pop" at the
-  // start.
-  long _anti_pop_countdown;
-  const long _anti_pop_ramp = 4000;
-  void _anti_pop_();
-  void _reset_anti_pop_();
 };
 }; // namespace wavenet
