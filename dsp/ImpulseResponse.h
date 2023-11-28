@@ -25,14 +25,13 @@ public:
   ImpulseResponse(const IRData& irData, const double sampleRate);
   double** Process(double** inputs, const size_t numChannels, const size_t numFrames) override;
   IRData GetData();
-  double GetSampleRate() const { return mSampleRate; };
   // TODO states for the IR class
   dsp::wav::LoadReturnCode GetWavState() const { return this->mWavState; };
 
 private:
   // Set the weights, given that the plugin is running at the provided sample
   // rate.
-  void _SetWeights();
+  void _SetWeights(const double sampleRate);
 
   // State of audio
   dsp::wav::LoadReturnCode mWavState;
@@ -41,7 +40,6 @@ private:
   double mRawAudioSampleRate;
   // Resampled to the required sample rate.
   std::vector<float> mResampled;
-  double mSampleRate;
 
   const size_t mMaxLength = 8192;
   // The weights

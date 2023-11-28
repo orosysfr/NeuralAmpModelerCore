@@ -22,8 +22,7 @@ mOutputStart(outputDegree)
   this->mOutputCoefficients.resize(outputDegree);
 }
 
-DSP_SAMPLE** recursive_linear_filter::Base::Process(DSP_SAMPLE** inputs, const size_t numChannels,
-                                                    const size_t numFrames)
+double** recursive_linear_filter::Base::Process(double** inputs, const size_t numChannels, const size_t numFrames)
 {
   this->_PrepareBuffers(numChannels, numFrames);
   long inputStart = 0;
@@ -41,7 +40,7 @@ DSP_SAMPLE** recursive_linear_filter::Base::Process(DSP_SAMPLE** inputs, const s
     outputStart = this->mOutputStart;
     for (auto s = 0; s < numFrames; s++)
     {
-      DSP_SAMPLE out = 0.0;
+      double out = 0.0;
       // Compute input terms
       inputStart -= 1;
       if (inputStart < 0)
