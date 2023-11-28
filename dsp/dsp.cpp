@@ -1,3 +1,9 @@
+/*
+ * File: dsp.cpp
+ * Created Date: March 17, 2023
+ * Author: Steven Atkinson (steven@atkinson.mn)
+ */
+
 #include <algorithm> // std::max_element
 #include <algorithm>
 #include <cmath> // pow, tanh, expf
@@ -8,9 +14,6 @@
 #include <unordered_set>
 
 #include "dsp.h"
-
-// ============================================================================
-// Implementation of Version 2 interface
 
 dsp::DSP::DSP()
 : mOutputPointers(nullptr)
@@ -27,7 +30,7 @@ void dsp::DSP::_AllocateOutputPointers(const size_t numChannels)
 {
   if (this->mOutputPointers != nullptr)
     throw std::runtime_error("Tried to re-allocate over non-null mOutputPointers");
-  this->mOutputPointers = new double*[numChannels];
+  this->mOutputPointers = new DSP_SAMPLE*[numChannels];
   if (this->mOutputPointers == nullptr)
     throw std::runtime_error("Failed to allocate pointer to output buffer!\n");
   this->mOutputPointersSize = numChannels;
@@ -45,7 +48,7 @@ void dsp::DSP::_DeallocateOutputPointers()
   this->mOutputPointersSize = 0;
 }
 
-double** dsp::DSP::_GetPointers()
+DSP_SAMPLE** dsp::DSP::_GetPointers()
 {
   for (auto c = 0; c < this->_GetNumChannels(); c++)
     this->mOutputPointers[c] = this->mOutputs[c].data();
@@ -110,7 +113,7 @@ void dsp::History::_RewindHistory()
   this->mHistoryIndex = this->mHistoryRequired;
 }
 
-void dsp::History::_UpdateHistory(double** inputs, const size_t numChannels, const size_t numFrames)
+void dsp::History::_UpdateHistory(DSP_SAMPLE** inputs, const size_t numChannels, const size_t numFrames)
 {
   this->_EnsureHistorySize(numFrames);
   if (numChannels < 1)
