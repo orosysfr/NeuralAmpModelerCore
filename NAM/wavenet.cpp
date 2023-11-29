@@ -27,7 +27,7 @@ void wavenet::_Layer::process_(const Eigen::MatrixXf& input, const Eigen::Matrix
                                Eigen::MatrixXf& head_input, Eigen::MatrixXf& output, const long i_start,
                                const long j_start)
 {
-    const long ncols = condition.cols();
+    const long ncols = (long)condition.cols();
     const long channels = this->get_channels();
     // Input dilated conv
     this->_conv.process_(input, this->_z, i_start, ncols, 0);
@@ -338,7 +338,7 @@ void wavenet::WaveNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
     // Clumsy...
     for (int j = 0; j < num_frames; j++)
     {
-        this->_condition(0, j) = input[j];
+        this->_condition(0, j) = (float)input[j];
         if (this->_stale_params) // Column-major assignment; good for Eigen. Let the
             // compiler optimize this.
             for (size_t i = 0; i < this->_param_names.size(); i++)
@@ -360,7 +360,7 @@ void wavenet::WaveNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
     //  Hack: apply head scale here; revisit when/if I activate the head.
     //  assert(this->_head_output.rows() == 1);
     
-    const long final_head_array = this->_head_arrays.size() - 1;
+    const long final_head_array = (long)this->_head_arrays.size() - 1;
     assert(this->_head_arrays[final_head_array].rows() == 1);
     for (int s = 0; s < num_frames; s++)
     {

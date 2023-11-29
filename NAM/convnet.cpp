@@ -51,15 +51,15 @@ void convnet::BatchNorm::process_(Eigen::MatrixXf& x, const long i_start, const 
 }
 
 void convnet::ConvNetBlock::set_params_(const int in_channels, const int out_channels, const int _dilation,
-                                        const bool batchnorm, const std::string activation,
+                                        const bool batchnorm_, const std::string activation_,
                                         std::vector<float>::iterator& params)
 {
-    this->_batchnorm = batchnorm;
+    this->_batchnorm = batchnorm_;
     // HACK 2 kernel
-    this->conv.set_size_and_params_(in_channels, out_channels, 2, _dilation, !batchnorm, params);
+    this->conv.set_size_and_params_(in_channels, out_channels, 2, _dilation, !batchnorm_, params);
     if (this->_batchnorm)
         this->batchnorm = BatchNorm(out_channels, params);
-    this->activation = activations::Activation::get_activation(activation);
+    this->activation = activations::Activation::get_activation(activation_);
 }
 
 void convnet::ConvNetBlock::process_(const Eigen::MatrixXf& input, Eigen::MatrixXf& output, const long i_start,
@@ -132,8 +132,8 @@ void convnet::ConvNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
         output[s] = this->_head_output(s);
 }
 
-void convnet::ConvNet::_verify_params(const int channels, const std::vector<int>& dilations, const bool batchnorm,
-                                      const size_t actual_params)
+void convnet::ConvNet::_verify_params(const int , const std::vector<int>& , const bool ,
+                                      const size_t )
 {
     // TODO
 }
@@ -144,7 +144,7 @@ void convnet::ConvNet::_update_buffers_(NAM_SAMPLE* input, const int num_frames)
     
     const size_t buffer_size = this->_input_buffer.size();
     
-    if (this->_block_vals[0].rows() != 1 || this->_block_vals[0].cols() != buffer_size)
+    if (this->_block_vals[0].rows() != 1 || this->_block_vals[0].cols() != (int)buffer_size)
     {
         this->_block_vals[0].resize(1, buffer_size);
         this->_block_vals[0].setZero();
@@ -153,7 +153,7 @@ void convnet::ConvNet::_update_buffers_(NAM_SAMPLE* input, const int num_frames)
     for (size_t i = 1; i < this->_block_vals.size(); i++)
     {
         if (this->_block_vals[i].rows() == this->_blocks[i - 1].get_out_channels()
-            && this->_block_vals[i].cols() == buffer_size)
+            && this->_block_vals[i].cols() == (int)buffer_size)
             continue; // Already has correct size
         this->_block_vals[i].resize(this->_blocks[i - 1].get_out_channels(), buffer_size);
         this->_block_vals[i].setZero();

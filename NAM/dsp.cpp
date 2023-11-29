@@ -46,7 +46,7 @@ void DSP::SetLoudness(const double loudness)
     mHasLoudness = true;
 }
 
-void DSP::finalize_(const int num_frames) {}
+void DSP::finalize_(const int) {}
 
 void DSP::_get_params_(const std::unordered_map<std::string, double>& input_params)
 {
@@ -106,7 +106,7 @@ void Buffer::_update_buffers_(NAM_SAMPLE* input, const int num_frames)
         this->_rewind_buffers_();
     // Put the new samples into the input buffer
     for (long i = this->_input_buffer_offset, j = 0; j < num_frames; i++, j++)
-        this->_input_buffer[i] = input[j];
+        this->_input_buffer[i] = (float)input[j];
     // And resize the output buffer:
     this->_output_buffer.resize(num_frames);
     std::fill(this->_output_buffer.begin(), this->_output_buffer.end(), 0.0f);
@@ -163,8 +163,9 @@ void Linear::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames
     for (size_t i = 0; i < num_frames; i++)
     {
         const size_t offset = this->_input_buffer_offset - this->_weight.size() + i + 1;
-        auto input = Eigen::Map<const Eigen::VectorXf>(&this->_input_buffer[offset], this->_receptive_field);
-        output[i] = this->_bias + this->_weight.dot(input);
+        output[i] =
+          this->_bias
+          + this->_weight.dot(Eigen::Map<const Eigen::VectorXf>(&this->_input_buffer[offset], this->_receptive_field));
     }
 }
 
@@ -174,8 +175,8 @@ void Conv1D::set_params_(std::vector<float>::iterator& params)
 {
     if (this->_weight.size() > 0)
     {
-        const long out_channels = this->_weight[0].rows();
-        const long in_channels = this->_weight[0].cols();
+        const long out_channels = (long)this->_weight[0].rows();
+        const long in_channels = (long)this->_weight[0].cols();
         // Crazy ordering because that's how it gets flattened.
         for (auto i = 0; i < out_channels; i++)
             for (auto j = 0; j < in_channels; j++)
@@ -187,7 +188,7 @@ void Conv1D::set_params_(std::vector<float>::iterator& params)
 }
 
 void Conv1D::set_size_(const int in_channels, const int out_channels, const int kernel_size, const bool do_bias,
-                       const int _dilation)
+                       const int dilation)
 {
     this->_weight.resize(kernel_size);
     for (size_t i = 0; i < this->_weight.size(); i++)
@@ -197,13 +198,13 @@ void Conv1D::set_size_(const int in_channels, const int out_channels, const int 
         this->_bias.resize(out_channels);
     else
         this->_bias.resize(0);
-    this->_dilation = _dilation;
+    this->_dilation = dilation;
 }
 
 void Conv1D::set_size_and_params_(const int in_channels, const int out_channels, const int kernel_size,
-                                  const int _dilation, const bool do_bias, std::vector<float>::iterator& params)
+                                  const int dilation_, const bool do_bias, std::vector<float>::iterator& params)
 {
-    this->set_size_(in_channels, out_channels, kernel_size, do_bias, _dilation);
+    this->set_size_(in_channels, out_channels, kernel_size, do_bias, dilation_);
     this->set_params_(params);
 }
 
@@ -213,7 +214,7 @@ void Conv1D::process_(const Eigen::MatrixXf& input, Eigen::MatrixXf& output, con
     // This is the clever part ;)
     for (size_t k = 0; k < this->_weight.size(); k++)
     {
-        const long offset = this->_dilation * (k + 1 - this->_weight.size());
+        const long offset = (long)this->_dilation * (long)(k + 1 - this->_weight.size());
         if (k == 0)
             output.middleCols(j_start, ncols) = this->_weight[k] * input.middleCols(i_start + offset, ncols);
         else
@@ -225,9 +226,9 @@ void Conv1D::process_(const Eigen::MatrixXf& input, Eigen::MatrixXf& output, con
 
 long Conv1D::get_num_params() const
 {
-    long num_params = this->_bias.size();
+    long num_params = (long)this->_bias.size();
     for (size_t i = 0; i < this->_weight.size(); i++)
-        num_params += this->_weight[i].size();
+        num_params += (long)this->_weight[i].size();
     return num_params;
 }
 
