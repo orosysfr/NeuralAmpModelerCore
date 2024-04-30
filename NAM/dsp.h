@@ -222,6 +222,8 @@ void verify_config_version(const std::string version);
 std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file);
 // Creates an instance of DSP. Also returns a dspData struct that holds the data of the model.
 std::unique_ptr<DSP> get_dsp(const std::filesystem::path model_file, dspData& returnedConfig);
+// Creates an instance of DSP using a string stream. Also returns a dspData struct that holds the data of the model.
+std::unique_ptr<DSP> get_dsp_direct(std::string const& jsonModelData, dspData& returnedConfig);
 // Instantiates a DSP object from dsp_config struct.
 std::unique_ptr<DSP> get_dsp(dspData& conf);
 // Legacy loader for directory-type DSPs

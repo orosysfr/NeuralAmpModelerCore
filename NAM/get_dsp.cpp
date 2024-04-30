@@ -94,6 +94,42 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename)
     return get_dsp(config_filename, temp);
 }
 
+std::unique_ptr<DSP> get_dsp_direct(const std::string& jsonData, dspData& returnedConfig)
+{
+    // if (!std::filesystem::exists(config_filename))
+    //     throw std::runtime_error("Config JSON doesn't exist!\n");
+    // std::ifstream i(config_filename);
+    auto j{nlohmann::json::parse(jsonData)};
+    verify_config_version(j["version"]);
+    
+    auto architecture = j["architecture"];
+    nlohmann::json config = j["config"];
+    std::vector<float> params = GetWeights(j, std::filesystem::path{});
+    
+    // Assign values to returnedConfig
+    returnedConfig.version = j["version"];
+    returnedConfig.architecture = j["architecture"];
+    returnedConfig.config = j["config"];
+    returnedConfig.metadata = j["metadata"];
+    returnedConfig.params = params;
+    if (j.find("sample_rate") != j.end())
+        returnedConfig.expected_sample_rate = j["sample_rate"];
+    else
+    {
+        returnedConfig.expected_sample_rate = -1.0;
+    }
+    
+    
+    /*Copy to a new dsp_config object for get_dsp below,
+     since not sure if params actually get modified as being non-const references on some
+     model constructors inside get_dsp(dsp_config& conf).
+     We need to return unmodified version of dsp_config via returnedConfig.*/
+    dspData conf = returnedConfig;
+    
+    return get_dsp(conf);
+}
+
+
 std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspData& returnedConfig)
 {
     if (!std::filesystem::exists(config_filename))
