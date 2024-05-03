@@ -96,9 +96,8 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename)
 
 std::unique_ptr<DSP> get_dsp_direct(const std::string& jsonData, dspData& returnedConfig)
 {
-    // if (!std::filesystem::exists(config_filename))
-    //     throw std::runtime_error("Config JSON doesn't exist!\n");
-    // std::ifstream i(config_filename);
+    if (jsonData.empty())
+         throw std::runtime_error("Config JSON doesn't exist!\n");
     auto j{nlohmann::json::parse(jsonData)};
     verify_config_version(j["version"]);
     
