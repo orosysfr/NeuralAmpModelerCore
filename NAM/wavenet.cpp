@@ -288,11 +288,21 @@ void wavenet::WaveNet::finalize_(const int num_frames)
     this->_advance_buffers_(num_frames);
 }
 
+void wavenet::WaveNet::setConditions(std::vector<float>& conditions)
+{
+    for (size_t i = 0; i < _param_names.size(); i++) {
+        this->_params[this->_param_names[i]] = conditions[i];
+    }
+};
+
 void wavenet::WaveNet::set_params_(std::vector<float>& params)
 {
     std::vector<float>::iterator it = params.begin();
     for (size_t i = 0; i < this->_layer_arrays.size(); i++)
+    {
         this->_layer_arrays[i].set_params_(it);
+    }
+  
     // this->_head.set_params_(it);
     this->_head_scale = *(it++);
     if (it != params.end())

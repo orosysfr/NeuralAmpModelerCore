@@ -176,6 +176,7 @@ public:
 
   void finalize_(const int num_frames) override;
   void set_params_(std::vector<float>& params);
+  void setConditions(std::vector<float>& conditions) override;
 
 private:
   long _num_frames;

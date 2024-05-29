@@ -79,6 +79,9 @@ public:
     // This is usually defined to be the loudness to a standardized input. The trainer has its own, but you can always
     // use this to define it a different way if you like yours better.
     void SetLoudness(const double loudness);
+
+    virtual void setConditions(std::vector<float>& conditions){};
+
     
 protected:
     bool mHasLoudness = false;
