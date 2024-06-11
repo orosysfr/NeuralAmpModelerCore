@@ -82,6 +82,7 @@ public:
 
     virtual void setConditions(std::vector<float>& conditions){};
 
+    std::unordered_map<std::string, double>& getParams() { return _params; };
     
 protected:
     bool mHasLoudness = false;
