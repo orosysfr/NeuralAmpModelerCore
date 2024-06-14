@@ -173,11 +173,12 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
     nlohmann::json& config = conf.config;
     std::vector<float>& params = conf.params;
     bool haveLoudness = false;
-    double loudness = 0.0;
+    auto loudness = 0.0;
     
     if (!conf.metadata.is_null())
     {
-        if (conf.metadata.find("loudness") != conf.metadata.end())
+        auto it = conf.metadata.find("loudness");
+        if (it != conf.metadata.end() && it->is_string() && *it != "null")
         {
             loudness = conf.metadata["loudness"];
             haveLoudness = true;
