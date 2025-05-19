@@ -22,14 +22,14 @@ struct Version
 Version ParseVersion(const std::string& versionStr)
 {
     Version version;
-    
+
     // Split the version string into major, minor, and patch components
     std::stringstream ss(versionStr);
     std::string majorStr, minorStr, patchStr;
     std::getline(ss, majorStr, '.');
     std::getline(ss, minorStr, '.');
     std::getline(ss, patchStr);
-    
+
     // Parse the components as integers and assign them to the version struct
     try
     {
@@ -45,7 +45,7 @@ Version ParseVersion(const std::string& versionStr)
     {
         throw std::out_of_range("Version string out of range: " + versionStr);
     }
-    
+
     // Validate the semver components
     if (version.major < 0 || version.minor < 0 || version.patch < 0)
     {
@@ -69,6 +69,7 @@ void verify_config_version(const std::string versionStr)
 
 std::vector<float> GetWeights(nlohmann::json const& j, const std::filesystem::path config_path)
 {
+    (void)config_path;
     if (j.find("weights") != j.end())
     {
         auto weight_list = j["weights"];
@@ -100,11 +101,11 @@ std::unique_ptr<DSP> get_dsp_direct(const std::string& jsonData, dspData& return
          throw std::runtime_error("Config JSON doesn't exist!\n");
     auto j{nlohmann::json::parse(jsonData)};
     verify_config_version(j["version"]);
-    
+
     auto architecture = j["architecture"];
     nlohmann::json config = j["config"];
     std::vector<float> params = GetWeights(j, std::filesystem::path{});
-    
+
     // Assign values to returnedConfig
     returnedConfig.version = j["version"];
     returnedConfig.architecture = j["architecture"];
@@ -117,14 +118,14 @@ std::unique_ptr<DSP> get_dsp_direct(const std::string& jsonData, dspData& return
     {
         returnedConfig.expected_sample_rate = -1.0;
     }
-    
-    
+
+
     /*Copy to a new dsp_config object for get_dsp below,
      since not sure if params actually get modified as being non-const references on some
      model constructors inside get_dsp(dsp_config& conf).
      We need to return unmodified version of dsp_config via returnedConfig.*/
     dspData conf = returnedConfig;
-    
+
     return get_dsp(conf);
 }
 
@@ -137,11 +138,11 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspDat
     nlohmann::json j;
     i >> j;
     verify_config_version(j["version"]);
-    
+
     auto architecture = j["architecture"];
     nlohmann::json config = j["config"];
     std::vector<float> params = GetWeights(j, config_filename);
-    
+
     // Assign values to returnedConfig
     returnedConfig.version = j["version"];
     returnedConfig.architecture = j["architecture"];
@@ -154,27 +155,27 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspDat
     {
         returnedConfig.expected_sample_rate = -1.0;
     }
-    
-    
+
+
     /*Copy to a new dsp_config object for get_dsp below,
      since not sure if params actually get modified as being non-const references on some
      model constructors inside get_dsp(dsp_config& conf).
      We need to return unmodified version of dsp_config via returnedConfig.*/
     dspData conf = returnedConfig;
-    
+
     return get_dsp(conf);
 }
 
 std::unique_ptr<DSP> get_dsp(dspData& conf)
 {
     verify_config_version(conf.version);
-    
+
     auto& architecture = conf.architecture;
     nlohmann::json& config = conf.config;
     std::vector<float>& params = conf.params;
     bool haveLoudness = false;
     double loudness = 0.0;
-    
+
     if (!conf.metadata.is_null())
     {
         if (conf.metadata.find("loudness") != conf.metadata.end())
@@ -184,7 +185,7 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
         }
     }
     const double expectedSampleRate = conf.expected_sample_rate;
-    
+
     std::unique_ptr<DSP> out = nullptr;
     if (architecture == "Linear")
     {
