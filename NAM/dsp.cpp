@@ -50,17 +50,52 @@ void DSP::finalize_(const int) {}
 
 void DSP::_get_params_(const std::unordered_map<std::string, double>& input_params)
 {
-    this->_stale_params = false;
+    bool dirty = false;
     for (auto it = input_params.begin(); it != input_params.end(); ++it)
     {
         const std::string key = util::lowercase(it->first);
         const double value = it->second;
         if (this->_params.find(key) == this->_params.end()) // Not contained
-            this->_stale_params = true;
+            dirty = true;
         else if (this->_params[key] != value) // Contained but new value
-            this->_stale_params = true;
+            dirty = true;
         this->_params[key] = value;
     }
+    this->_stale_params |= dirty;
+}
+
+bool DSP::hasParameter(const std::string& parameterName) noexcept
+{
+    return parameterMap.find(parameterName) != parameterMap.end();
+}
+
+void DSP::setParameterValue(const std::string& parameterName, NAM_SAMPLE value) noexcept
+{
+    auto& smoother = parameterMap.at(parameterName);
+    smoother.setTargetValue(value);
+}
+
+void DSP::resetParameterSmoothing(double sampleRate, double duration) noexcept
+{
+    for (auto& smoother : std::views::values(parameterMap)) {
+        smoother.reset(sampleRate, duration);
+    }
+}
+
+void DSP::skipSamplesForParameters(int numSamples) noexcept
+{
+    for (auto& smoother : std::views::values(parameterMap)) {
+        smoother.skip(numSamples);
+    }
+}
+
+std::vector<std::string> DSP::getParameterNames() noexcept
+{
+    std::vector<std::string> names;
+    names.reserve(parameterMap.size());
+    for (const auto& k : std::views::keys(parameterMap))
+        names.emplace_back(k);
+    return names;
 }
 
 // Buffer =====================================================================
