@@ -321,8 +321,7 @@ void wavenet::WaveNet::_init_parametric_(nlohmann::json& parametric)
     {
         auto& key = it.key();
         this->_param_names.push_back(key);
-        auto [_, inserted] = parameterMap.try_emplace(key, static_cast<NAM_SAMPLE>(0.0));
-        assert(inserted);
+        parameterMap.try_emplace(key, static_cast<NAM_SAMPLE>(0.0));
     }
     std::sort(this->_param_names.begin(), this->_param_names.end());
 }
