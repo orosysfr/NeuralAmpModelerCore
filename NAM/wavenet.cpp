@@ -340,7 +340,7 @@ void wavenet::WaveNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
     // Fill into condition array:
     for (auto i = 0; i < num_frames; ++i)
     {
-        this->_condition(0, i) = input[i];
+        this->_condition(0, i) = (float)input[i];
     }
 
     const auto dimensionSize = _param_names.size() + 1;
@@ -350,7 +350,7 @@ void wavenet::WaveNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
         auto& smoother = parameterMap.at(parameterName);
         for (auto j = 0; j < num_frames; ++j)
         {
-            this->_condition(i, j) = smoother.getNextValue();
+            this->_condition(i, j) = (float)smoother.getNextValue();
         }
     }
     
