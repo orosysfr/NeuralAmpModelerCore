@@ -318,8 +318,11 @@ void wavenet::WaveNet::_advance_buffers_(const int num_frames)
 void wavenet::WaveNet::_init_parametric_(nlohmann::json& parametric)
 {
     for (nlohmann::json::iterator it = parametric.begin(); it != parametric.end(); ++it)
-        this->_param_names.push_back(it.key());
-    // TODO assert continuous 0 to 1
+    {
+        auto& key = it.key();
+        this->_param_names.push_back(key);
+        parameterMap.try_emplace(key, static_cast<NAM_SAMPLE>(0.0));
+    }
     std::sort(this->_param_names.begin(), this->_param_names.end());
 }
 
@@ -335,14 +338,20 @@ void wavenet::WaveNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
     this->_prepare_for_frames_(num_frames);
     
     // Fill into condition array:
-    // Clumsy...
-    for (int j = 0; j < num_frames; j++)
+    for (auto i = 0; i < num_frames; ++i)
     {
-        this->_condition(0, j) = (float)input[j];
-        if (this->_stale_params) // Column-major assignment; good for Eigen. Let the
-            // compiler optimize this.
-            for (size_t i = 0; i < this->_param_names.size(); i++)
-                this->_condition(i + 1, j) = (float)this->_params[this->_param_names[i]];
+        this->_condition(0, i) = (float)input[i];
+    }
+
+    const auto dimensionSize = _param_names.size() + 1;
+    for (auto i = 1; i < dimensionSize; ++i)
+    {
+        auto& parameterName = _param_names.at(i - 1);
+        auto& smoother = parameterMap.at(parameterName);
+        for (auto j = 0; j < num_frames; ++j)
+        {
+            this->_condition(i, j) = (float)smoother.getNextValue();
+        }
     }
     
     // Main layer arrays:

@@ -9,6 +9,8 @@
 
 #include <Eigen/Dense>
 
+#include "util.h"
+
 //#include "activations.h"
 //#include "json.hpp"
 
@@ -97,6 +99,16 @@ protected:
     // If anything has changed, then set this->_stale_params to true.
     // (TODO use "listener" approach)
     void _get_params_(const std::unordered_map<std::string, double>& input_params);
+    
+    
+public:
+    bool hasParameter(const std::string& parameterName) noexcept;
+    void setParameterValue(const std::string& parameterName, NAM_SAMPLE value) noexcept;
+    void resetParameterSmoothing(double sampleRate, double duration) noexcept;
+    void skipSamplesForParameters(int numSamples) noexcept;
+    std::vector<std::string> getParameterNames() noexcept;
+protected:
+    std::map<std::string, util::Smoother<NAM_SAMPLE>> parameterMap;
 };
 
 // Class where an input buffer is kept so that long-time effects can be
