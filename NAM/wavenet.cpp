@@ -235,7 +235,7 @@ void wavenet::_Head::_apply_activation_(Eigen::MatrixXf& x)
 // WaveNet ====================================================================
 
 wavenet::WaveNet::WaveNet(const std::vector<wavenet::LayerArrayParams>& layer_array_params, const float head_scale,
-                          const bool with_head, nlohmann::json parametric, std::vector<float> params,
+                          const bool with_head, nlohmann::ordered_json parametric, std::vector<float> params,
                           const double expected_sample_rate)
 : DSP(expected_sample_rate)
 , _num_frames(0)
@@ -315,15 +315,15 @@ void wavenet::WaveNet::_advance_buffers_(const int num_frames)
         this->_layer_arrays[i].advance_buffers_(num_frames);
 }
 
-void wavenet::WaveNet::_init_parametric_(nlohmann::json& parametric)
+void wavenet::WaveNet::_init_parametric_(nlohmann::ordered_json& parametric)
 {
-    for (nlohmann::json::iterator it = parametric.begin(); it != parametric.end(); ++it)
+    for (nlohmann::ordered_json::iterator it = parametric.begin(); it != parametric.end(); ++it)
     {
         auto& key = it.key();
         this->_param_names.push_back(key);
         parameterMap.try_emplace(key, static_cast<NAM_SAMPLE>(0.0));
     }
-    std::sort(this->_param_names.begin(), this->_param_names.end());
+    //std::sort(this->_param_names.begin(), this->_param_names.end());
 }
 
 void wavenet::WaveNet::_prepare_for_frames_(const long num_frames)

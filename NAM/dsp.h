@@ -108,7 +108,7 @@ public:
     void skipSamplesForParameters(int numSamples) noexcept;
     std::vector<std::string> getParameterNames() noexcept;
 protected:
-    std::map<std::string, util::Smoother<NAM_SAMPLE>> parameterMap;
+    std::unordered_map<std::string, util::Smoother<NAM_SAMPLE>> parameterMap;
 };
 
 // Class where an input buffer is kept so that long-time effects can be
@@ -220,8 +220,8 @@ struct dspData
 {
     std::string version;
     std::string architecture;
-    nlohmann::json config;
-    nlohmann::json metadata;
+    nlohmann::ordered_json config;
+    nlohmann::ordered_json metadata;
     std::vector<float> params;
     double expected_sample_rate;
 };

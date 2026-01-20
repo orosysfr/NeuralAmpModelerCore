@@ -168,7 +168,7 @@ class WaveNet : public DSP
 {
 public:
   WaveNet(const std::vector<LayerArrayParams>& layer_array_params, const float head_scale, const bool with_head,
-          nlohmann::json parametric, std::vector<float> params, const double expected_sample_rate = -1.0);
+          nlohmann::ordered_json parametric, std::vector<float> params, const double expected_sample_rate = -1.0);
 
   //    WaveNet(WaveNet&&) = default;
   //    WaveNet& operator=(WaveNet&&) = default;
@@ -197,7 +197,7 @@ private:
 
   void _advance_buffers_(const int num_frames);
   // Get the info from the parametric config
-  void _init_parametric_(nlohmann::json& parametric);
+  void _init_parametric_(nlohmann::ordered_json& parametric);
   void _prepare_for_frames_(const long num_frames);
   // Reminder: From ._input_post_gain to ._core_dsp_output
   void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override;

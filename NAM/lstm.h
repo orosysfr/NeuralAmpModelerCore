@@ -52,7 +52,7 @@ class LSTM : public DSP
 {
 public:
     LSTM(const int num_layers, const int input_size, const int hidden_size, std::vector<float>& params,
-         nlohmann::json& parametric, const double expected_sample_rate = -1.0);
+       nlohmann::ordered_json& parametric, const double expected_sample_rate = -1.0);
     ~LSTM() = default;
     
 protected:
@@ -64,7 +64,7 @@ protected:
     float _process_sample(const float x);
     
     // Initialize the parametric map
-    void _init_parametric(nlohmann::json& parametric);
+    void _init_parametric(nlohmann::ordered_json& parametric);
     
     // Mapping from param name to index in _input_and_params:
     std::map<std::string, int> _parametric_map;
