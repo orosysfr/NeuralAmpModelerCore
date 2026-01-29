@@ -321,9 +321,8 @@ void wavenet::WaveNet::_init_parametric_(nlohmann::ordered_json& parametric)
     {
         auto& key = it.key();
         this->_param_names.push_back(key);
-        parameterMap.try_emplace(key, static_cast<NAM_SAMPLE>(0.0));
+        parameterMap.emplace_back(key);
     }
-    //std::sort(this->_param_names.begin(), this->_param_names.end());
 }
 
 void wavenet::WaveNet::_prepare_for_frames_(const long num_frames)
@@ -347,7 +346,8 @@ void wavenet::WaveNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int 
     for (auto i = 1; i < dimensionSize; ++i)
     {
         auto& parameterName = _param_names.at(i - 1);
-        auto& smoother = parameterMap.at(parameterName);
+        auto param = findParameter(parameterName);
+        auto& smoother = param->value;
         for (auto j = 0; j < num_frames; ++j)
         {
             this->_condition(i, j) = (float)smoother.getNextValue();
