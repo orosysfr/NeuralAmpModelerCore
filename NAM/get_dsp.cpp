@@ -99,11 +99,11 @@ std::unique_ptr<DSP> get_dsp_direct(const std::string& jsonData, dspData& return
 {
     if (jsonData.empty())
          throw std::runtime_error("Config JSON doesn't exist!\n");
-    auto j{nlohmann::json::parse(jsonData)};
+    auto j{nlohmann::ordered_json::parse(jsonData)};
     verify_config_version(j["version"]);
 
     auto architecture = j["architecture"];
-    nlohmann::json config = j["config"];
+    nlohmann::ordered_json config = j["config"];
     std::vector<float> params = GetWeights(j, std::filesystem::path{});
 
     // Assign values to returnedConfig
@@ -171,7 +171,7 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
     verify_config_version(conf.version);
 
     auto& architecture = conf.architecture;
-    nlohmann::json& config = conf.config;
+    nlohmann::ordered_json& config = conf.config;
     std::vector<float>& params = conf.params;
     bool haveLoudness = false;
     double loudness = 0.0;
@@ -208,7 +208,7 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
         const int num_layers = config["num_layers"];
         const int input_size = config["input_size"];
         const int hidden_size = config["hidden_size"];
-        auto empty_json = nlohmann::json{};
+        auto empty_json = nlohmann::ordered_json{};
         out = std::make_unique<lstm::LSTM>(num_layers, input_size, hidden_size, params, empty_json, expectedSampleRate);
     }
     else if (architecture == "CatLSTM")
@@ -238,7 +238,7 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
         // Solves compilation issue on macOS Error: No matching constructor for
         // initialization of 'wavenet::WaveNet' Solution from
         // https://stackoverflow.com/a/73956681/3768284
-        auto parametric_json = architecture == "CatWaveNet" ? config["parametric"] : nlohmann::json{};
+        auto parametric_json = architecture == "CatWaveNet" ? config["parametric"] : nlohmann::ordered_json{};
         out = std::make_unique<wavenet::WaveNet>(
                                                  layer_array_params, head_scale, with_head, parametric_json, params, expectedSampleRate);
     }

@@ -108,7 +108,18 @@ public:
     void skipSamplesForParameters(int numSamples) noexcept;
     std::vector<std::string> getParameterNames() noexcept;
 protected:
-    std::map<std::string, util::Smoother<NAM_SAMPLE>> parameterMap;
+    struct Parameter
+    {
+        std::string name;
+        util::Smoother<NAM_SAMPLE> value;
+
+        Parameter() = default;
+        Parameter(std::string n)
+        : name(std::move(n)), value(static_cast<NAM_SAMPLE>(0.0)) {}
+    };
+    std::vector<Parameter> parameterMap;
+
+    Parameter* findParameter(const std::string& name) noexcept;
 };
 
 // Class where an input buffer is kept so that long-time effects can be
@@ -220,8 +231,8 @@ struct dspData
 {
     std::string version;
     std::string architecture;
-    nlohmann::json config;
-    nlohmann::json metadata;
+    nlohmann::ordered_json config;
+    nlohmann::ordered_json metadata;
     std::vector<float> params;
     double expected_sample_rate;
 };

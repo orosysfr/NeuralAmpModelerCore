@@ -67,7 +67,7 @@ void lstm::LSTMCell::process_(const Eigen::VectorXf& x)
 }
 
 lstm::LSTM::LSTM(const int num_layers, const int input_size, const int hidden_size, std::vector<float>& params,
-                 nlohmann::json& parametric, const double expected_sample_rate)
+                 nlohmann::ordered_json& parametric, const double expected_sample_rate)
 : DSP(expected_sample_rate)
 {
     this->_init_parametric(parametric);
@@ -81,10 +81,10 @@ lstm::LSTM::LSTM(const int num_layers, const int input_size, const int hidden_si
     assert(it == params.end());
 }
 
-void lstm::LSTM::_init_parametric(nlohmann::json& parametric)
+void lstm::LSTM::_init_parametric(nlohmann::ordered_json& parametric)
 {
     std::vector<std::string> parametric_names;
-    for (nlohmann::json::iterator it = parametric.begin(); it != parametric.end(); ++it)
+  for (nlohmann::ordered_json::iterator it = parametric.begin(); it != parametric.end(); ++it)
     {
         parametric_names.push_back(it.key());
     }

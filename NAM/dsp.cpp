@@ -64,28 +64,42 @@ void DSP::_get_params_(const std::unordered_map<std::string, double>& input_para
     this->_stale_params |= dirty;
 }
 
+DSP::Parameter* DSP::findParameter(const std::string& name) noexcept
+{
+    for (auto& param : parameterMap)
+    {
+        if (param.name == name)
+            return &param;
+    }
+    return nullptr;
+}
+
 bool DSP::hasParameter(const std::string& parameterName) noexcept
 {
-    return parameterMap.find(parameterName) != parameterMap.end();
+    return findParameter(parameterName) != nullptr;
 }
 
 void DSP::setParameterValue(const std::string& parameterName, NAM_SAMPLE value) noexcept
 {
-    auto& smoother = parameterMap.at(parameterName);
-    smoother.setTargetValue(value);
+    if (auto* param = findParameter(parameterName))
+    {
+        param->value.setTargetValue(value);
+    }
 }
 
 void DSP::resetParameterSmoothing(double sampleRate, double duration) noexcept
 {
-    for (auto& smoother : std::views::values(parameterMap)) {
-        smoother.reset(sampleRate, duration);
+    for (auto& param : parameterMap)
+    {
+        param.value.reset(sampleRate, duration);
     }
 }
 
 void DSP::skipSamplesForParameters(int numSamples) noexcept
 {
-    for (auto& smoother : std::views::values(parameterMap)) {
-        smoother.skip(numSamples);
+    for (auto& param : parameterMap)
+    {
+        param.value.skip(numSamples);
     }
 }
 
@@ -93,8 +107,8 @@ std::vector<std::string> DSP::getParameterNames() noexcept
 {
     std::vector<std::string> names;
     names.reserve(parameterMap.size());
-    for (const auto& k : std::views::keys(parameterMap))
-        names.emplace_back(k);
+    for (const auto& param : parameterMap)
+        names.emplace_back(param.name);
     return names;
 }
 
