@@ -43,6 +43,12 @@ protected:
 private:
   std::vector<Submodel> _submodels;
   size_t _active_index = 0;
+  size_t _previous_index = 0;
+  // Number of samples over which a submodel switch is crossfaded, and how many remain in the current fade.
+  int _crossfade_length = 0;
+  int _crossfade_remaining = 0;
+  // Pre-allocated scratch for the fading-out submodel's output during a crossfade.
+  std::vector<NAM_SAMPLE> _crossfade_output;
 
   DSP& _active_model() { return *_submodels[_active_index].model; }
 };
