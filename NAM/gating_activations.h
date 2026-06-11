@@ -64,7 +64,7 @@ public:
     assert(output.rows() == num_channels);
     assert(output.cols() == input.cols());
 
-    const int num_samples = input.cols();
+    const int num_samples = (int)input.cols();
 
 #ifdef NAM_USE_INLINE_GEMM
     // Optimized path: direct memory access with activation applied per-element
@@ -170,7 +170,7 @@ public:
     assert(output.rows() == num_channels);
     assert(output.cols() == input.cols());
 
-    const int num_samples = input.cols();
+    const int num_samples = (int)input.cols();
 
 #ifdef NAM_USE_INLINE_GEMM
     // Optimized path: direct memory access
