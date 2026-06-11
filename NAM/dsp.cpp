@@ -75,7 +75,7 @@ void nam::DSP::prewarm()
   int samplesProcessed = 0;
   while (samplesProcessed < prewarmSamples)
   {
-    this->process(inputPtrs.data(), outputPtrs.data(), bufferSize);
+    this->process(inputPtrs.data(), outputPtrs.data(), static_cast<int>(bufferSize));
     samplesProcessed += bufferSize;
   }
 }
