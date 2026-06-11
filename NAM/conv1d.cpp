@@ -134,7 +134,7 @@ void Conv1D::SetMaxBufferSize(const int maxBufferSize)
   // Set max lookback before Reset so that Reset() can use it to calculate storage size
   // Reset() will calculate storage size as: 2 * max_lookback + max_buffer_size
   _input_buffer.SetMaxLookback(receptive_field);
-  _input_buffer.Reset(in_channels, maxBufferSize);
+  _input_buffer.Reset(static_cast<int>(in_channels), maxBufferSize);
 
   // Pre-allocate output matrix
   const long out_channels = get_out_channels();
