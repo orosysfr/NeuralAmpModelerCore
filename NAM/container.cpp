@@ -51,8 +51,29 @@ ContainerModel::ContainerModel(std::vector<Submodel> submodels, const double exp
 
 void ContainerModel::process(NAM_SAMPLE** input, NAM_SAMPLE** output, const int num_frames)
 {
-  const size_t active_index = _active_index.load(std::memory_order_acquire);
-  _submodels[active_index].model->process(input, output, num_frames);
+  if (_crossfade_remaining <= 0)
+  {
+    _active_model().process(input, output, num_frames);
+    return;
+  }
+
+  // Outgoing model: process in place on a copy of the input, since NAM process() is called in place.
+  for (int i = 0; i < num_frames; ++i)
+    _crossfade_output[i] = input[0][i];
+  NAM_SAMPLE* previousChannels[1] = {_crossfade_output.data()};
+  _submodels[_previous_index].model->process(previousChannels, previousChannels, num_frames);
+
+  // Incoming submodel: process in place over the real buffer.
+  _active_model().process(input, output, num_frames);
+
+  for (int i = 0; i < num_frames && _crossfade_remaining > 0; ++i)
+  {
+    const double t = (double)(_crossfade_length - _crossfade_remaining) / (double)_crossfade_length;
+    // The incoming model can emit NaN while it warms; fall back to the outgoing model for those samples.
+    const NAM_SAMPLE incoming = std::isfinite(output[0][i]) ? output[0][i] : _crossfade_output[i];
+    output[0][i] = _crossfade_output[i] * (1.0 - t) + incoming * t;
+    --_crossfade_remaining;
+  }
 }
 
 void ContainerModel::prewarm()
@@ -70,26 +91,31 @@ void ContainerModel::SetPrewarmOnReset(const bool prewarmOnReset)
 
 void ContainerModel::Reset(const double sampleRate, const int maxBufferSize)
 {
-  std::lock_guard<std::mutex> lock(_slim_set_mutex);
-
   // Update this container's reset state without dispatching through DSP::Reset(),
   // which would prewarm the active child before the child receives these settings.
   mExternalSampleRate = sampleRate;
   mHaveExternalSampleRate = true;
   SetMaxBufferSize(maxBufferSize);
 
-  const size_t active_index = _active_index.load(std::memory_order_acquire);
-  _submodels[active_index].model->Reset(sampleRate, maxBufferSize);
+  // Reset every submodel, not just the active one, so a later switch can crossfade in a warmed model without resetting on the audio thread.
+  for (auto& sm : _submodels)
+    sm.model->Reset(sampleRate, maxBufferSize);
+
+  // 30 ms crossfade, scratch buffers sized to the largest block we can be asked to process.
+  _crossfade_length = std::max(1, (int)(0.030 * sampleRate));
+  _crossfade_remaining = 0;
+  _previous_index = _active_index.load(std::memory_order_acquire);
+  _crossfade_output.assign(maxBufferSize, (NAM_SAMPLE)0.0);
 }
 
 size_t ContainerModel::_get_index_for_slimmable_size(const double val) const
 {
-  size_t active_index = _submodels.size() - 1;
+  size_t new_index = _submodels.size() - 1;
   for (size_t i = 0; i < _submodels.size(); ++i)
   {
     if (val < _submodels[i].max_value)
     {
-      active_index = i;
+      new_index = i;
       break;
     }
   }
@@ -100,25 +126,16 @@ void ContainerModel::SetSlimmableSize(const double val)
 {
   const size_t active_index = _get_index_for_slimmable_size(val);
 
-  // Fast path: no change to active model.
-  if (active_index == _active_index.load(std::memory_order_acquire))
-  {
+  // Skip the switch when the submodel is unchanged so dragging within a range does not glitch the audio.
+  const size_t current_index = _active_index.load(std::memory_order_acquire);
+  if (new_index == current_index)
     return;
-  }
 
-  // Plugin host can deliver param changes from both UI/controller and processor paths.
-  // Serialize reset so only one thread can perform model activation at a time.
-  std::lock_guard<std::mutex> lock(_slim_set_mutex);
-  if (active_index == _active_index.load(std::memory_order_acquire))
-  {
-    return;
-  }
-  // Setting _active_index puts the model in the RT path, so reset before doing that.
-  const double sr = mHaveExternalSampleRate ? mExternalSampleRate : mExpectedSampleRate;
-  _submodels[active_index].model->Reset(sr, GetMaxBufferSize());
-
-  // Finally set when we're ready:
-  _active_index.store(active_index, std::memory_order_release);
+  // No reset here: Reset() re-runs prewarm() and spikes the audio thread, and the submodels are already warmed at load.
+  // Just switch and let the crossfade cover the swap.
+  _previous_index = current_index;
+  _active_index.store(new_index, std::memory_order_release);
+  _crossfade_remaining = _crossfade_length;
 }
 
 std::vector<double> ContainerModel::GetSlimmableSizeBreakpoints() const
@@ -134,9 +151,7 @@ std::vector<double> ContainerModel::GetSlimmableSizeBreakpoints() const
 
 int ContainerModel::GetPrewarmSamples()
 {
-  const size_t active_index = _active_index.load(std::memory_order_acquire);
-
-  return _submodels[active_index].model->GetPrewarmSamples();
+  return _active_model().GetPrewarmSamples();
 }
 
 // =============================================================================
