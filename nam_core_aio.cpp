@@ -1,4 +1,4 @@
-// GENOME single-translation-unit aggregator for NAM core v0.5.1.
+// GENOME single-translation-unit aggregator for NAM core.
 // This file is GENOME-specific; it does not exist upstream.
 //
 // Including all NAM .cpp files into one TU keeps the .jucer project from
@@ -16,6 +16,7 @@
 #include "NAM/convnet.cpp"
 #include "NAM/dsp.cpp"
 #include "NAM/get_dsp.cpp"
+#include "NAM/linear.cpp"
 #include "NAM/lstm.cpp"
 #include "NAM/ring_buffer.cpp"
 #include "NAM/util.cpp"

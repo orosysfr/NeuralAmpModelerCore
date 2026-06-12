@@ -1,4 +1,4 @@
-// GENOME aggregator header for NAM core (sdatkinson/NeuralAmpModelerCore v0.5.1).
+// GENOME aggregator header for NAM core (sdatkinson/NeuralAmpModelerCore).
 // This file is GENOME-specific; it does not exist upstream.
 //
 // Includes the NAM public headers and exposes the upstream `nam::` namespace
@@ -15,6 +15,7 @@
 #include "NAM/get_dsp.h"
 #include "NAM/activations.h"
 #include "NAM/conv1d.h"
+#include "NAM/linear.h"
 #include "NAM/convnet.h"
 #include "NAM/lstm.h"
 #include "NAM/util.h"
