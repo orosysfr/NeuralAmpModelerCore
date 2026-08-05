@@ -119,12 +119,12 @@ size_t ContainerModel::_get_index_for_slimmable_size(const double val) const
       break;
     }
   }
-  return active_index;
+  return new_index;
 }
 
 void ContainerModel::SetSlimmableSize(const double val)
 {
-  const size_t active_index = _get_index_for_slimmable_size(val);
+  const size_t new_index = _get_index_for_slimmable_size(val);
 
   // Skip the switch when the submodel is unchanged so dragging within a range does not glitch the audio.
   const size_t current_index = _active_index.load(std::memory_order_acquire);
